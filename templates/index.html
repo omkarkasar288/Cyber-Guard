@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Guard | Advanced Cybersecurity Toolkit</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+    
+    <style>
+        :root { --bg-dark: #0b0c10; --bg-panel: #1f2833; --neon: #66fcf1; --neon-dim: #45a29e; --danger: #ff4c4c; }
+        body { background-color: var(--bg-dark); color: #c5c6c7; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        
+        .navbar { background: var(--bg-panel); border-bottom: 2px solid var(--neon); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .navbar-brand { color: var(--neon) !important; font-weight: 800; letter-spacing: 1px; }
+        
+        /* Dashboard Styling */
+        .tool-card {
+            background: var(--bg-panel); border: 1px solid var(--neon-dim); border-radius: 12px;
+            padding: 30px; text-align: center; cursor: pointer; transition: all 0.3s ease; height: 100%;
+        }
+        .tool-card:hover { transform: translateY(-8px); box-shadow: 0 0 20px rgba(102, 252, 241, 0.3); border-color: var(--neon); }
+        .tool-icon { font-size: 3rem; color: var(--neon); margin-bottom: 15px; }
+
+        .tool-section { display: none; padding: 20px; animation: fadeIn 0.5s ease; }
+        .dashboard-view { display: block; }
+        
+        /* Form & UI Elements */
+        .form-control { background: #000; border: 1px solid var(--neon-dim); color: #fff; border-radius: 6px; }
+        .form-control:focus { background: #111; color: #fff; border-color: var(--neon); box-shadow: none; }
+        .result-box { background: #000; padding: 15px; border-left: 4px solid var(--neon); margin-top: 20px; white-space: pre-wrap; font-family: 'Consolas', monospace; max-height: 400px; overflow-y: auto; border-radius: 4px; }
+        
+        .meta-table { width: 100%; color: #fff; font-size: 0.9rem; }
+        .meta-table td { padding: 10px; border-bottom: 1px solid #2c3531; }
+        .meta-table tr:last-child td { border-bottom: none; }
+        
+        .crypto-icon-box {
+            border: 1px solid var(--neon-dim); border-radius: 8px; padding: 15px;
+            text-align: center; cursor: pointer; transition: 0.2s; background: #111; height: 100%;
+        }
+        .crypto-icon-box:hover, .crypto-active { background: var(--neon-dim); color: #000; border-color: var(--neon); font-weight: bold; }
+        .crypto-icon-box i { font-size: 1.5rem; margin-bottom: 5px; display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <span class="navbar-brand"><i class="fa-solid fa-shield-halved me-2"></i>CYBER GUARD</span>
+        <button class="btn btn-outline-info btn-sm fw-bold" onclick="showDashboard()">DASHBOARD</button>
+    </div>
+</nav>
+
+<div class="container mt-5">
+
+    <div id="dashboard" class="dashboard-view">
+        <div class="row g-4">
+            <div class="col-md-4" onclick="openTool('tool-url')"><div class="tool-card"><i class="fa-solid fa-globe tool-icon"></i><h5>URL Scanner</h5></div></div>
+            <div class="col-md-4" onclick="openTool('tool-file')"><div class="tool-card"><i class="fa-solid fa-file-medical tool-icon"></i><h5>File Static Analyzer</h5></div></div>
+            <div class="col-md-4" onclick="openTool('tool-meta')"><div class="tool-card"><i class="fa-solid fa-camera tool-icon"></i><h5>Metadata Extractor</h5></div></div>
+            
+            <div class="col-md-4" onclick="openTool('tool-stego')"><div class="tool-card"><i class="fa-solid fa-eye-slash tool-icon"></i><h5>Steganography</h5></div></div>
+            <div class="col-md-4" onclick="openTool('tool-brute')"><div class="tool-card"><i class="fa-solid fa-hashtag tool-icon"></i><h5>Offline Hash Cracker</h5></div></div>
+            <div class="col-md-4" onclick="openTool('tool-crypto')"><div class="tool-card"><i class="fa-solid fa-key tool-icon"></i><h5>Crypto Hub</h5></div></div>
+            
+            <div class="col-md-6" onclick="openTool('tool-sqli')"><div class="tool-card border-danger shadow"><i class="fa-solid fa-database tool-icon text-danger"></i><h5 class="text-danger">Interactive SQLi Lab</h5></div></div>
+            <div class="col-md-6" onclick="openTool('tool-game')"><div class="tool-card bg-dark border-info shadow"><i class="fa-solid fa-user-shield tool-icon text-info"></i><h5 class="text-info">Cyber Awareness Game</h5></div></div>
+        </div>
+    </div>
+
+    <div id="tool-url" class="tool-section">
+        <button class="btn btn-secondary btn-sm mb-3" onclick="showDashboard()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <div class="card p-4 bg-dark text-white border-info shadow">
+            <h4>URL Vulnerability Scanner</h4>
+            <p class="text-muted small">Analyze suspicious links for phishing indicators, DGAs, and obfuscation.</p>
+            <input type="text" id="urlInput" class="form-control mb-3" placeholder="https://example-secure-login.com">
+            <button onclick="scanUrl()" class="btn btn-info w-100 fw-bold">RUN SCAN</button>
+            <div id="urlResult" class="result-box d-none"></div>
+        </div>
+    </div>
+
+    <div id="tool-file" class="tool-section">
+        <button class="btn btn-secondary btn-sm mb-3" onclick="showDashboard()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <div class="card p-4 bg-dark text-white border-info shadow">
+            <h4>File Static Analyzer</h4>
+            <p class="text-muted small">Perform a deep heuristic scan, check for packed payloads, and analyze internal metadata.</p>
+            <input type="file" id="fileInput" class="form-control mb-3">
+            <button onclick="scanFile()" id="analyzeBtn" class="btn btn-info w-100 fw-bold">ANALYZE FILE</button>
+            
+            <div id="scanProgress" class="progress mt-3 d-none" style="height: 25px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark fw-bold" role="progressbar" style="width: 100%">
+                    <i class="fa-solid fa-microchip fa-spin me-2"></i> File is scanning... Please wait.
+                </div>
+            </div>
+            <div id="fileResult" class="result-box d-none"></div>
+        </div>
+    </div>
+
+    <div id="tool-meta" class="tool-section">
+        <button class="btn btn-secondary btn-sm mb-3" onclick="showDashboard()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <div class="card p-4 bg-dark text-white border-info shadow">
+            <h4>Forensic Metadata Extractor</h4>
+            <p class="text-muted small">Extract EXIF data (GPS, Camera, Date) from images locally.</p>
+            <input type="file" id="metaInput" class="form-control mb-3" accept="image/jpeg, image/png" onchange="extractMetaClient()">
+            <div id="metaResult" class="result-box d-none"></div>
+        </div>
+    </div>
+
+    <div id="tool-stego" class="tool-section">
+        <button class="btn btn-secondary btn-sm mb-3" onclick="showDashboard()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <div class="card bg-dark text-white border-info shadow">
+            <div class="card-header border-info"><h4>Image Steganography</h4></div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="stegoTab">
+                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-hide">Encode</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-reveal">Decode</button></li>
+                </ul>
+                <div class="tab-content mt-3">
+                    <div class="tab-pane fade show active" id="tab-hide">
+                        <input type="file" id="stegoInputHide" class="form-control mb-2" onchange="document.getElementById('hideResult').innerHTML=''">
+                        <input type="text" id="stegoSecret" class="form-control mb-2" placeholder="Enter message to hide...">
+                        <button id="btnHide" onclick="hideStego()" class="btn btn-danger w-100 fw-bold">HIDE IN IMAGE</button>
+                        <div id="hideResult" class="mt-3 text-center"></div>
+                    </div>
+                    <div class="tab-pane fade" id="tab-reveal">
+                        <input type="file" id="stegoInputReveal" class="form-control mb-2" onchange="document.getElementById('revealResult').classList.add('d-none')">
+                        <button id="btnReveal" onclick="revealStego()" class="btn btn-success w-100 fw-bold">REVEAL HIDDEN DATA</button>
+                        <div id="revealResult" class="result-box d-none"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tool-brute" class="tool-section">
+        <button class="btn btn-secondary btn-sm mb-3" onclick="showDashboard()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <div class="card p-4 bg-dark text-white border-info shadow">
+            <h4>Offline Hash Cracker</h4>
+            <p class="text-muted small">Realistic dictionary attack against a SHA-256 cryptographic hash.</p>
+            
+            <label class="form-label text-info fw-bold">1. Enter Target Hash:</label>
+            <input type="text" id="hashTarget" class="form-control mb-2" placeholder="Enter a SHA-256 Hash...">
+            <div class="mb-3 small">
+                <span class="text-muted">Test Hashes: </span>
+                <a href="#" class="text-info text-decoration-none" onclick="document.getElementById('hashTarget').value='85dfbc59fb496cbba7d75a89e00045e7518bd1b415a7ee4fbab77dd0d611cb3d'; return false;">[Load 'omkar']</a>
+                <a href="#" class="text-info text-decoration-none ms-2" onclick="document.getElementById('hashTarget').value='8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92'; return false;">[Load '123456']</a>
+            </div>
+
+            <label class="form-label text-info fw-bold">2. Upload Custom Wordlist (Optional):</label>
+            <p class="text-muted small mb-1">Upload a .txt file. If left blank, the built-in dictionary is used.</p>
+            <input type="file" id="wordlistInput" class="form-control mb-4" accept=".txt">
+
+            <button onclick="runHashCracker()" id="btnStartCrack" class="btn btn-danger w-100 fw-bold">RUN DICTIONARY ATTACK</button>
+            <div id="crackDisplay" class="result-box d-none"></div>
+        </div>
+    </div>
+
+    <div id="tool-crypto" class="tool-section">
+        <button class="btn btn-secondary btn-sm mb-3" onclick="showDashboard()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <div class="card p-4 bg-dark text-white border-info shadow">
+            <h4>Encryption Engine</h4>
+            <div class="row g-2 mb-4">
+                <div class="col-4"><div class="crypto-icon-box" onclick="selectCrypto('caesar')" id="btn-caesar"><i class="fa-solid fa-font"></i> Caesar</div></div>
+                <div class="col-4"><div class="crypto-icon-box" onclick="selectCrypto('aes')" id="btn-aes"><i class="fa-solid fa-lock"></i> AES-128</div></div>
+                <div class="col-4"><div class="crypto-icon-box" onclick="selectCrypto('base64')" id="btn-base64"><i class="fa-solid fa-code"></i> Base64</div></div>
+                <div class="col-4"><div class="crypto-icon-box" onclick="selectCrypto('sha256')" id="btn-sha256"><i class="fa-solid fa-hashtag"></i> SHA-256</div></div>
+                <div class="col-4"><div class="crypto-icon-box" onclick="selectCrypto('vigenere')" id="btn-vigenere"><i class="fa-solid fa-layer-group"></i> Vigenère</div></div>
+                <div class="col-4"><div class="crypto-icon-box" onclick="selectCrypto('vernam')" id="btn-vernam"><i class="fa-solid fa-file-shield"></i> Vernam</div></div>
+            </div>
+            
+            <div id="crypto-workspace">
+                <h5 id="crypto-title" class="text-info">Select an Algorithm</h5>
+                <input id="cryptoText" class="form-control mb-2" placeholder="Input text...">
+                <input id="cryptoKey" class="form-control mb-2 d-none" placeholder="Encryption Key...">
+                <div class="row g-2" id="crypto-buttons">
+                    <div class="col-6" id="btn-col-encrypt"><button id="btnCryptoAction" onclick="runCrypto('encrypt')" class="btn btn-success w-100 fw-bold">ENCRYPT</button></div>
+                    <div class="col-6" id="btn-col-decrypt"><button id="btnCryptoDecrypt" onclick="runCrypto('decrypt')" class="btn btn-warning w-100 fw-bold">DECRYPT</button></div>
+                </div>
+            </div>
+            
+            <div id="cryptoResult" class="result-box d-none"></div>
+        </div>
+    </div>
+
+    <div id="tool-sqli" class="tool-section">
+        <button class="btn btn-secondary btn-sm mb-3" onclick="showDashboard()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <div class="card p-4 bg-dark text-white border-danger shadow mx-auto" style="max-width: 600px;">
+            <h4 class="text-center mb-4 text-danger"><i class="fa-solid fa-database me-2"></i>Interactive SQL Injection Lab</h4>
+            
+            <div class="mb-4">
+                <label class="form-label text-info fw-bold small">Target Offline Database (.db / .sqlite):</label>
+                <input type="file" id="sqliDbInput" class="form-control form-control-sm" accept=".db,.sqlite,.sqlite3">
+            </div>
+
+            <div class="card bg-black border-secondary p-4 mb-4">
+                <h5 class="text-center mb-3">System Login Demo</h5>
+                
+                <input type="text" id="sqliUser" class="form-control mb-3" placeholder="Target Username or Email">
+                <input type="text" id="sqliPass" class="form-control mb-4" placeholder="Password or Payload">
+                
+                <div class="d-flex justify-content-center gap-4 mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="sqliMode" id="modeVulnerable" value="vulnerable" checked>
+                        <label class="form-check-label text-danger fw-bold" for="modeVulnerable">Vulnerable Mode</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="sqliMode" id="modeSecure" value="secure">
+                        <label class="form-check-label text-success fw-bold" for="modeSecure">Secure Mode</label>
+                    </div>
+                </div>
+
+                <button onclick="runSqliInteractive()" id="btnSqliLogin" class="btn btn-primary w-100 fw-bold fs-5 rounded-pill">Login to System</button>
+            </div>
+
+            <h6 class="text-muted text-center">SQL Queries Log (Backend execution)</h6>
+            <div id="sqliQueryDisplay" class="p-3 bg-black rounded border border-secondary" style="font-family: monospace; font-size: 0.85rem; min-height: 100px; white-space: pre-wrap;">Awaiting execution...</div>
+        </div>
+    </div>
+
+    <div id="tool-game" class="tool-section">
+        <button class="btn btn-secondary btn-sm mb-3" onclick="showDashboard()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <div class="card p-4 bg-dark text-white border-info shadow">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>Phishing Detection Training</h4>
+                <div id="gameScore" class="text-info fw-bold">Score: 0</div>
+            </div>
+            <hr class="border-secondary">
+            <div id="scenario-container">
+                <div class="mb-4">
+                    <span class="badge bg-warning text-dark mb-2" id="scenario-type">Challenge</span>
+                    <div id="scenario-text" class="p-3 bg-light text-dark rounded border-start border-4 border-danger"></div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-6"><button onclick="checkAnswer(true)" class="btn btn-outline-danger w-100 p-3 fw-bold">SUSPICIOUS (SCAM)</button></div>
+                    <div class="col-md-6"><button onclick="checkAnswer(false)" class="btn btn-outline-success w-100 p-3 fw-bold">LEGITIMATE (SAFE)</button></div>
+                </div>
+            </div>
+            <div id="gameFeedback" class="mt-4 p-3 rounded d-none"></div>
+            <button id="nextScenarioBtn" class="btn btn-info w-100 mt-3 d-none fw-bold" onclick="nextScenario()">NEXT SCENARIO</button>
+            <button id="restartGameBtn" class="btn btn-outline-light w-100 mt-3 d-none fw-bold" onclick="startGame()">RESTART TRAINING</button>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    /* VIEW CONTROLLER */
+    function showDashboard() { 
+        document.querySelectorAll('.tool-section').forEach(el => el.style.display = 'none'); 
+        document.getElementById('dashboard').style.display = 'block'; 
+    }
+    function openTool(id) { 
+        document.getElementById('dashboard').style.display = 'none'; 
+        document.getElementById(id).style.display = 'block'; 
+        if(id === 'tool-game') startGame(); 
+    }
+
+    /* 1. URL SCANNER */
+    async function scanUrl() { 
+        let url = document.getElementById('urlInput').value;
+        if(!url) return;
+        let fd = new FormData(); fd.append('url', url); 
+        let res = await fetch('/scan_url', {method:'POST',body:fd}); 
+        let d = await res.json(); 
+        
+        let warningsHTML = d.warnings.map(w => `<li>${w}</li>`).join('');
+        document.getElementById('urlResult').innerHTML = `SECURITY STATUS: <b style="color:${d.color}">${d.risk}</b>\nSCORE: ${d.score}/100\n\n<b>Analysis:</b>\n<ul>${warningsHTML}</ul>`; 
+        document.getElementById('urlResult').classList.remove('d-none'); 
+    }
+
+    /* 2. FILE SCANNER WITH PROGRESS BAR */
+    async function scanFile() { 
+        let fileInput = document.getElementById('fileInput');
+        let file = fileInput.files[0];
+        let resultBox = document.getElementById('fileResult');
+        let btn = document.getElementById('analyzeBtn');
+        let progressBar = document.getElementById('scanProgress');
+
+        if(!file) { alert("Please select a file first."); return; }
+
+        btn.disabled = true;
+        btn.innerText = "SCANNING IN PROGRESS...";
+        resultBox.classList.add('d-none'); 
+        progressBar.classList.remove('d-none'); 
+        
+        let fd = new FormData(); 
+        fd.append('file', file); 
+
+        try {
+            let res = await fetch('/scan_file', {method:'POST', body:fd}); 
+            let d = await res.json(); 
+            
+            let successHeader = `<div class="text-success mb-3" style="font-size: 1.1em; border-bottom: 1px solid #45a29e; padding-bottom: 10px;">
+                                    <i class="fa-solid fa-check-circle"></i> <b>File Scanned Successfully!</b>
+                                 </div>`;
+            let riskStatus = `<b>VERDICT:</b> <span style="color:${d.color}; font-size: 1.2em; font-weight: bold;">${d.risk}</span><br><br>`;
+            
+            resultBox.innerHTML = successHeader + riskStatus + d.message; 
+            resultBox.classList.remove('d-none');
+        } catch (e) {
+            resultBox.innerHTML = '<span class="text-danger"><i class="fa-solid fa-circle-exclamation"></i> Critical Error scanning file.</span>';
+            resultBox.classList.remove('d-none');
+        } finally {
+            progressBar.classList.add('d-none');
+            btn.disabled = false;
+            btn.innerText = "ANALYZE FILE";
+        }
+    }
+
+    /* 3. METADATA EXTRACTOR */
+    function extractMetaClient() {
+        const fileInput = document.getElementById('metaInput');
+        const box = document.getElementById('metaResult');
+        box.innerHTML = '<div class="text-info"><i class="fa-solid fa-circle-notch fa-spin"></i> Processing image forensics...</div>';
+        box.classList.remove('d-none');
+
+        if (fileInput.files && fileInput.files[0]) {
+            EXIF.getData(fileInput.files[0], function() {
+                const allTags = EXIF.getAllTags(this);
+                if (Object.keys(allTags).length === 0) {
+                    box.innerHTML = `<div class="text-warning fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> NO METADATA FOUND: This image appears to be stripped of forensic data or doesn't support EXIF tags.</div>`;
+                } else {
+                    let table = '<table class="meta-table"><tr><th>Forensic Tag</th><th>Detected Value</th></tr>';
+                    for (let tag in allTags) {
+                        table += `<tr><td style="color:var(--neon)">${tag}</td><td>${allTags[tag]}</td></tr>`;
+                    }
+                    box.innerHTML = table + '</table>';
+                }
+            });
+        }
+    }
+
+    /* 4. STEGANOGRAPHY */
+    async function hideStego() {
+        const btn = document.getElementById('btnHide');
+        const resBox = document.getElementById('hideResult');
+        const file = document.getElementById('stegoInputHide').files[0];
+        const secret = document.getElementById('stegoSecret').value;
+        if(!file || !secret) { alert("Missing file or secret message."); return; }
+        btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
+        resBox.innerHTML = '';
+        let fd = new FormData(); fd.append('file', file); fd.append('secret', secret);
+        try {
+            let res = await fetch('/stego_hide', {method:'POST', body:fd}); let d = await res.json();
+            if(d.status === "success") { resBox.innerHTML = `<a href="${d.download_url}" class="btn btn-success fw-bold mt-2 shadow">DOWNLOAD ENCODED IMAGE</a>`; } 
+            else { resBox.innerHTML = `<div class="text-danger">${d.msg}</div>`; }
+        } catch(e) { resBox.innerHTML = "Server Error."; } finally { btn.disabled = false; btn.innerText = "HIDE IN IMAGE"; }
+    }
+    async function revealStego() {
+        const btn = document.getElementById('btnReveal');
+        const resBox = document.getElementById('revealResult');
+        const file = document.getElementById('stegoInputReveal').files[0];
+        if(!file) { alert("Select an image to scan."); return; }
+        btn.disabled = true; btn.innerHTML = 'Scanning Pixels...';
+        let fd = new FormData(); fd.append('file', file);
+        try {
+            let res = await fetch('/stego_reveal', {method:'POST', body:fd}); let d = await res.json();
+            resBox.innerText = "DECODED DATA: " + d.message; resBox.classList.remove('d-none');
+        } catch(e) { resBox.innerText = "Decryption Failed."; } finally { btn.disabled = false; btn.innerText = "REVEAL HIDDEN DATA"; }
+    }
+
+    /* 5. OFFLINE HASH CRACKER */
+    async function runHashCracker() {
+        let target = document.getElementById('hashTarget').value; 
+        let wordlistFile = document.getElementById('wordlistInput').files[0]; 
+
+        if(!target) { alert("Enter a valid SHA-256 hash first."); return; }
+        
+        let btn = document.getElementById('btnStartCrack');
+        let display = document.getElementById('crackDisplay');
+        
+        btn.disabled = true; btn.innerText = "CRACKING...";
+        display.classList.remove('d-none'); 
+        
+        if (wordlistFile) { display.innerHTML = `INITIALIZING DICTIONARY ATTACK...\nLoading custom wordlist: [${wordlistFile.name}]...\nCalculating hashes...\n`; } 
+        else { display.innerHTML = `INITIALIZING DICTIONARY ATTACK...\nLoading default built-in wordlist...\nCalculating hashes...\n`; }
+        
+        let fd = new FormData(); 
+        fd.append('hash', target);
+        if (wordlistFile) { fd.append('wordlist', wordlistFile); }
+        
+        try {
+            let res = await fetch('/hash_cracker', {method: 'POST', body: fd}); let d = await res.json();
+            if (d.status === "CRACKED") { display.innerHTML += `\n>> ACCESS GRANTED <<\n${d.msg}`; display.style.borderLeftColor = "#00ff41"; } 
+            else if (d.status === "error") { display.innerHTML += `\n>> ERROR <<\n${d.msg}`; display.style.borderLeftColor = "#ffae00"; } 
+            else { display.innerHTML += `\n>> ATTACK FAILED <<\n${d.msg}`; display.style.borderLeftColor = "#ff0000"; }
+        } catch(e) { display.innerHTML += "\nError communicating with the cracking engine."; } 
+        finally { btn.disabled = false; btn.innerText = "RUN DICTIONARY ATTACK"; }
+    }
+
+    /* 6. CRYPTO HUB */
+    let currentAlgo = '';
+    function selectCrypto(algo) {
+        currentAlgo = algo;
+        
+        // Highlight active button
+        document.querySelectorAll('.crypto-icon-box').forEach(el => el.classList.remove('crypto-active'));
+        document.getElementById('btn-'+algo).classList.add('crypto-active');
+        document.getElementById('crypto-title').innerText = "Algorithm: " + algo.toUpperCase();
+        
+        // Clear previous data automatically
+        document.getElementById('cryptoText').value = '';
+        document.getElementById('cryptoKey').value = '';
+        document.getElementById('cryptoResult').classList.add('d-none');
+        document.getElementById('cryptoResult').innerText = '';
+        
+        // Handle UI Logic for SHA-256
+        document.getElementById('cryptoKey').className = (algo==='vigenere'||algo==='vernam' || algo==='aes') ? "form-control mb-2" : "d-none";
+        
+        let encryptCol = document.getElementById('btn-col-encrypt');
+        let decryptCol = document.getElementById('btn-col-decrypt');
+        let encryptBtn = document.getElementById('btnCryptoAction');
+        
+        if (algo === 'sha256') {
+            decryptCol.classList.add('d-none'); 
+            encryptCol.className = 'col-12';    
+            encryptBtn.innerText = 'GENERATE HASH';
+        } else {
+            decryptCol.classList.remove('d-none'); 
+            encryptCol.className = 'col-6';        
+            encryptBtn.innerText = 'ENCRYPT';     
+        }
+    }
+    
+    async function runCrypto(mode) {
+        if(!currentAlgo) { alert("Select algorithm."); return; }
+        let fd = new FormData(); fd.append('algo', currentAlgo); fd.append('mode', mode); 
+        fd.append('text', document.getElementById('cryptoText').value); fd.append('key', document.getElementById('cryptoKey').value);
+        let res = await fetch('/crypto', {method:'POST', body:fd}); let d = await res.json();
+        document.getElementById('cryptoResult').classList.remove('d-none'); document.getElementById('cryptoResult').innerText = d.result;
+    }
+
+    /* 7. INTERACTIVE SQLI DEMO */
+    async function runSqliInteractive() {
+        let dbFile = document.getElementById('sqliDbInput').files[0];
+        let user = document.getElementById('sqliUser').value;
+        let pass = document.getElementById('sqliPass').value;
+        let mode = document.querySelector('input[name="sqliMode"]:checked').value;
+        let btn = document.getElementById('btnSqliLogin');
+        let logDisplay = document.getElementById('sqliQueryDisplay');
+
+        if(!dbFile) { alert("Please upload a local database file first!"); return; }
+
+        btn.disabled = true; btn.innerText = "Processing...";
+        
+        let fd = new FormData();
+        fd.append('db_file', dbFile);
+        fd.append('username', user);
+        fd.append('password', pass);
+        fd.append('mode', mode);
+
+        try {
+            let res = await fetch('/sqli_interactive', { method: 'POST', body: fd });
+            let d = await res.json();
+            
+            let logText = "";
+            if (mode === 'secure') {
+                logText += `<span class="text-success">[SECURE QUERY]</span> Parameterized query executed safely with inputs: (${user}, ${pass})\n\n`;
+            } else {
+                logText += `<span class="text-danger">[VULNERABLE QUERY]</span> ${d.query}\n\n`;
+            }
+            
+            logText += `<span style="color:${d.color}">${d.msg}</span>`;
+            logDisplay.innerHTML = logText;
+            
+        } catch (e) {
+            logDisplay.innerHTML = "<span class='text-warning'>Error communicating with the backend engine.</span>";
+        } finally {
+            btn.disabled = false; btn.innerText = "Login to System";
+        }
+    }
+
+    /* 8. CYBER AWARENESS GAME */
+    const scenarios = [
+        { type: "Email", content: "<b>From:</b> security@paypa1-support.com<br><b>Subject:</b> Action Required: Account Locked<br><br>Unauthorized access detected. Click <a href='#'>here</a> to verify.", isScam: true, explanation: "Phishers use 'paypa1' (with a 1) to mimic PayPal. Domain is unauthorized." },
+        { type: "SMS", content: "<b>Message:</b> USPS: Your package is held at the warehouse. Pay $1.99 redelivery fee at: https://bit.ly/usps-package-id99", isScam: true, explanation: "Official postal services never use shortened bit.ly links for payments." },
+        { type: "Phone", content: "Incoming call from 'Local Police': 'You have an outstanding warrant. Pay $500 in Apple Gift Cards to avoid immediate arrest.'", isScam: true, explanation: "Police and Government agencies never demand payment via gift cards or crypto." },
+        { type: "Email", content: "<b>From:</b> it-support@your-organization.com<br><b>Subject:</b> Password Expiry Warning<br><br>Your password expires in 48 hours. Please update it using the standard SSO portal.", isScam: false, explanation: "This follows standard corporate IT security protocols from an internal domain." }
+    ];
+    let currentScenarioIdx = 0, score = 0;
+    function startGame() { currentScenarioIdx = 0; score = 0; document.getElementById('gameScore').innerText = `Score: ${score}`; document.getElementById('restartGameBtn').classList.add('d-none'); loadScenario(); }
+    function loadScenario() {
+        if (currentScenarioIdx >= scenarios.length) { endGame(); return; }
+        const s = scenarios[currentScenarioIdx];
+        document.getElementById('scenario-type').innerText = s.type;
+        document.getElementById('scenario-text').innerHTML = s.content;
+        document.getElementById('gameFeedback').classList.add('d-none');
+        document.getElementById('nextScenarioBtn').classList.add('d-none');
+        document.getElementById('scenario-container').style.opacity = "1";
+        document.getElementById('scenario-container').style.pointerEvents = "auto";
+    }
+    function checkAnswer(userSaysScam) {
+        const s = scenarios[currentScenarioIdx];
+        const feedback = document.getElementById('gameFeedback');
+        feedback.classList.remove('d-none');
+        document.getElementById('scenario-container').style.opacity = "0.6";
+        document.getElementById('scenario-container').style.pointerEvents = "none";
+        if (userSaysScam === s.isScam) { score += 10; feedback.className = "mt-4 p-3 rounded bg-success text-white"; feedback.innerHTML = `<b>✓ CORRECT:</b> ${s.explanation}`; }
+        else { feedback.className = "mt-4 p-3 rounded bg-danger text-white"; feedback.innerHTML = `<b>✗ INCORRECT:</b> ${s.explanation}`; }
+        document.getElementById('gameScore').innerText = `Score: ${score}`;
+        document.getElementById('nextScenarioBtn').classList.remove('d-none');
+    }
+    function nextScenario() { currentScenarioIdx++; loadScenario(); }
+    function endGame() {
+        document.getElementById('scenario-text').innerHTML = `<h3>Training Complete!</h3><p>Your Security Awareness Score: <b>${score} / ${scenarios.length * 10}</b></p>`;
+        document.getElementById('nextScenarioBtn').classList.add('d-none');
+        document.getElementById('restartGameBtn').classList.remove('d-none');
+    }
+</script>
+</body>
+</html>
